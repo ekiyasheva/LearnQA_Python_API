@@ -9,6 +9,7 @@ if cookie_value is not None:
     cookies.update({'auth_cookie': cookie_value})
 
 
+
 response2 = requests.post("https://playground.learnqa.ru/api/check_auth_cookie", cookies=cookies)
 print(response2.text)
 print(response2.status_code)
