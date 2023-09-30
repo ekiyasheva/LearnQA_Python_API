@@ -1,6 +1,8 @@
 import pytest
 import requests
-class TestUserAuth:
+from lib.base_case import BaseCase
+
+class TestUserAuth(BaseCase):
     exclude_params = [
         ("no_cookie"),
         ("no_token")
