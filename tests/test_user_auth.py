@@ -7,31 +7,22 @@ class TestUserAuth(BaseCase):
         ("no_cookie"),
         ("no_token")
     ]
-    def setup(self):
+    def setup_method(self):
         url_login = "https://playground.learnqa.ru/api/user/login"
         self.url_auth = "https://playground.learnqa.ru/api/user/auth"
         data = {
             'email': 'vinkotov@example.com',
             'password': '1234'
         }
-
         response1 = requests.post(url_login, data=data)
+        self.auth_sid = self.get_cookie(response1, "auth_sid")
+        self.token = self.get_header(response1, "x-csrf-token")
+        self.user_id_from_auth_method = self.get_json_value(response1, "user_id")
 
-        assert "auth_sid" in response1.cookies, "There is no auth cookie in in the response"
-        assert "x-csrf-token" in response1.headers, "There is no CSRF token header in the response"
-        assert "user_id" in response1.json(), "There is no user id in the response"
-
-        self.auth_id = response1.cookies.get("auth_sid")
-        self.token = response1.headers.get("x-csrf-token")
-        self.user_id_from_auth_method = response1.json()["user_id"]
-
-        print(self.user_id_from_auth_method)
-        print(self.auth_id)
-        print(self.token)
 
     def test_auth_user(self):
 
-        response2 = requests.get(self.url_auth, headers={"x-csrf-token": self.token}, cookies={"auth_sid": self.auth_id})
+        response2 = requests.get(self.url_auth, headers={"x-csrf-token": self.token}, cookies={"auth_sid": self.auth_sid})
 
         assert "user_id" in response2.json(), "There is no user id in the second response"
         user_id_check_method = response2.json()["user_id"]
@@ -50,7 +41,7 @@ class TestUserAuth(BaseCase):
         else:
             response2 = requests.get(
                 self.url_auth,
-                cookies= {"auth_sid": self.auth_id}
+                cookies= {"auth_sid": self.auth_sid}
             )
 
         assert "user_id" in response2.json(), "There is no user id in the second response"
